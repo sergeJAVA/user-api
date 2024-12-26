@@ -1,6 +1,7 @@
 package com.example.user_api.service;
 
-import com.example.user_api.model.User;
+import com.example.user_api.model.entity.User;
+import com.example.user_api.model.dto.UserDto;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface UserService {
 
     User findByName(String username);
 
-    User save(User user);
+    User save(UserDto userDto);
 
     User update(User user);
 

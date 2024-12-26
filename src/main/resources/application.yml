@@ -17,3 +17,6 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create-drop
+
+jwt:
+  secret: secretkeyPasswordForAuth12312312312313213123123sdfsdf

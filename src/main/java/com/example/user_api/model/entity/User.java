@@ -1,4 +1,4 @@
-package com.example.user_api.model;
+package com.example.user_api.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,6 +21,9 @@ public class User {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "role")
+    private String role;
 
 
 }

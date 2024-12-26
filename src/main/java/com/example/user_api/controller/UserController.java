@@ -1,6 +1,7 @@
 package com.example.user_api.controller;
 
-import com.example.user_api.model.User;
+import com.example.user_api.model.entity.User;
+import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.relation.Role;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public User createUser(User user) {
+    public User createUser(@RequestBody UserDto user) {
         return userService.save(user);
     }
 
@@ -61,6 +63,7 @@ public class UserController {
 
         nikodim.setName("Nikodim");
         nikodim.setPassword("password");
+        nikodim.setRole("user");
 
         users.add(nikodim);
         users.add(serega);

@@ -1,6 +1,8 @@
 package com.example.user_api.service;
 
-import com.example.user_api.model.User;
+import com.example.user_api.mapper.UserMapper;
+import com.example.user_api.model.entity.User;
+import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,8 +14,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
-
+    private final UserMapper userMapper;
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
@@ -30,8 +31,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User save(User user) {
-        return userRepository.save(user);
+    public User save(UserDto userDto) {
+
+        return userRepository.save(userMapper.toUser(userDto));
     }
 
     @Override
