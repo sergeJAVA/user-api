@@ -61,11 +61,6 @@ class UserServiceImplTest {
 
     @Test
     void updateShouldReturnBadRequest() {
-        Optional<User> ivan = Optional.ofNullable(User.builder()
-                .name("Ivan")
-                .password("123")
-                .id(1L)
-                .build());
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         Assertions.assertEquals(new ResponseEntity<>("The user with ID 1 doesn't exist ", HttpStatus.BAD_REQUEST), userService.update("Nikita", 1L));
