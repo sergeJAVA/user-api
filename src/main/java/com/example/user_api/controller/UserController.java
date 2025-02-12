@@ -5,11 +5,12 @@ import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.relation.Role;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,8 @@ import java.util.List;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
+
+    private final BCryptPasswordEncoder passwordEncoder;
 
     private final UserService userService;
 
@@ -45,6 +48,17 @@ public class UserController {
         return userService.save(user);
     }
 
+    @PostMapping("/update-username")
+    public ResponseEntity<String> updateUser(@RequestParam String username, @RequestParam Long id) {
+        return userService.update(username, id);
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<String> updateUser(@RequestParam String username, @RequestParam String password, @RequestParam Long id) {
+
+        return userService.update(username, passwordEncoder.encode(password), id);
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<HttpStatus> deleteById(@PathVariable Long id) {
         userService.deleteById(id);
@@ -59,10 +73,11 @@ public class UserController {
         User nikodim = new User();
 
         serega.setName("Serega");
-        serega.setPassword("12345");
+        serega.setPassword(passwordEncoder.encode("12345"));
+        serega.setRole("user");
 
         nikodim.setName("Nikodim");
-        nikodim.setPassword("password");
+        nikodim.setPassword(passwordEncoder.encode("password"));
         nikodim.setRole("user");
 
         users.add(nikodim);
