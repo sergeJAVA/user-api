@@ -49,12 +49,12 @@ public class UserController {
     }
 
     @PostMapping("/update-username")
-    public ResponseEntity<String> updateUser(@RequestParam String username, @RequestParam Long id) {
+    public ResponseEntity<String> updateUser(@RequestParam Long id, @RequestParam String username) {
         return userService.update(username, id);
     }
 
     @PostMapping("/update")
-    public ResponseEntity<String> updateUser(@RequestParam String username, @RequestParam String password, @RequestParam Long id) {
+    public ResponseEntity<String> updateUser(@RequestParam Long id, @RequestParam String username, @RequestParam String password) {
 
         return userService.update(username, passwordEncoder.encode(password), id);
     }
@@ -76,7 +76,7 @@ public class UserController {
         serega.setPassword(passwordEncoder.encode("12345"));
         serega.setRole("user");
 
-        nikodim.setName("Nikodim");
+        nikodim.setName("Kolya");
         nikodim.setPassword(passwordEncoder.encode("password"));
         nikodim.setRole("user");
 
