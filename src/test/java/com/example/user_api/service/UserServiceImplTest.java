@@ -1,19 +1,24 @@
 package com.example.user_api.service;
 
+import com.example.user_api.mapper.UserMapper;
+import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.model.entity.User;
 import com.example.user_api.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -24,52 +29,133 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    @Test
-    void findByNameShouldReturnNull() {
-        Mockito.when(userRepository.findByName("Ivan")).thenReturn(Optional.empty());
+    @Mock
+    private UserMapper userMapper;
 
-        User ivan = userService.findByName("Ivan");
-        Assertions.assertNull(ivan);
+    private User testUser;
+    private UserDto testUserDto;
+
+
+    @BeforeEach
+    void setUp() {
+        testUser = User.builder().name("testUser").password("password").id(1L).build();
+        testUserDto = UserDto.builder().name("testUser").password("password").build();
+    }
+
+    @Test
+    void findAll_ShouldReturnListOfUsers() {
+        List<User> users = Arrays.asList(testUser);
+        when(userService.findAll()).thenReturn(users);
+
+        List<User> result = userService.findAll();
+
+        assertEquals(users, result);
+        verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
+    void findById_WhenUserExists_ShouldReturnUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(testUser));
+
+        User result = userService.findById(1L);
+
+        assertEquals(testUser, result);
+        verify(userRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void findById_WhenUserNotExists_ShouldReturnNull() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        User result = userService.findById(1L);
+
+        assertNull(result);
+        verify(userRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void findByName_WhenUserNotExists_ShouldReturnNull() {
+        when(userRepository.findByName("testUser")).thenReturn(Optional.empty());
+
+        User result = userService.findByName("testUser");
+
+        assertNull(result);
+        verify(userRepository, times(1)).findByName("testUser");
     }
 
 
     @Test
-    void findByNameShouldReturnUser() {
-        User ivan = User.builder()
-                .name("Ivan")
-                .password("123")
-                .id(1L)
-                .build();
+    void findByName_WhenUserExists_ShouldReturnUser() {
+        when(userRepository.findByName("testUser")).thenReturn(Optional.ofNullable(testUser));
 
-        Mockito.when(userRepository.findByName("Ivan")).thenReturn(Optional.ofNullable(ivan));
+        User result = userService.findByName("testUser");
 
-        User user = userService.findByName("Ivan");
-        Assertions.assertEquals(ivan, user);
+        assertEquals(testUser, result);
+        verify(userRepository, times(1)).findByName("testUser");
     }
 
     @Test
-    void updateShouldReturnOK() {
-        Optional<User> ivan = Optional.ofNullable(User.builder()
-                .name("Ivan")
-                .password("123")
-                .id(1L)
-                .build());
-        Mockito.when(userRepository.findById(1L)).thenReturn(ivan);
+    void save_ShouldReturnSavedUser() {
+        when(userMapper.toUser(testUserDto)).thenReturn(testUser);
+        when(userRepository.save(testUser)).thenReturn(testUser);
 
-        Assertions.assertEquals(new ResponseEntity<>("The username with id 1 has been changed", HttpStatus.OK), userService.update("Nikita", 1L));
+        User result = userService.save(testUserDto);
+
+        assertEquals(testUser, result);
+        verify(userMapper, times(1)).toUser(testUserDto);
+        verify(userRepository, times(1)).save(testUser);
     }
 
     @Test
-    void updateShouldReturnBadRequest() {
-        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
+    void updateUsername_WhenUserExists_ShouldReturnSuccessResponse() {
+        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(testUser));
+        when(userRepository.save(testUser)).thenReturn(testUser);
 
-        Assertions.assertEquals(new ResponseEntity<>("The user with ID 1 doesn't exist ", HttpStatus.BAD_REQUEST), userService.update("Nikita", 1L));
+        ResponseEntity<String> result = userService.update("newUsername", 1L);
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals("The username with id 1 has been changed", result.getBody());
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).save(testUser);
     }
 
+    @Test
+    void updateUsername_WhenUserNotExists_ShouldReturnBadRequest() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
+        ResponseEntity<String> result = userService.update("newUsername", 1L);
 
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertEquals("The user with ID 1 doesn't exist ", result.getBody());
+        verify(userRepository, times(1)).findById(1L);
+    }
 
+    @Test
+    void updateUsernameAndPassword_WhenUserExists_ShouldReturnSuccessResponse() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(testUser)).thenReturn(testUser);
 
+        ResponseEntity<String> result = userService.update("newUsername", "newPassword", 1L);
 
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals("Username and password on id 1 have been changed", result.getBody());
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).save(testUser);
+    }
 
+    @Test
+    void deleteById_ShouldCallRepositoryDelete() {
+        userService.deleteById(1L);
+
+        verify(userRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void saveAll_ShouldCallRepositorySaveAll() {
+        List<User> users = Arrays.asList(testUser);
+
+        userService.saveAll(users);
+
+        verify(userRepository, times(1)).saveAll(users);
+    }
 }
