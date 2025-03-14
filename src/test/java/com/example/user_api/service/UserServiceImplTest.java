@@ -145,9 +145,14 @@ class UserServiceImplTest {
 
     @Test
     void deleteById_ShouldCallRepositoryDelete() {
-        userService.deleteById(1L);
+        User user = new User(1L, "Serega", "password", "user");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        ResponseEntity<String> response = userService.deleteById(1L);
 
         verify(userRepository, times(1)).deleteById(1L);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("The user with 1 has been deleted", response.getBody());
     }
 
     @Test

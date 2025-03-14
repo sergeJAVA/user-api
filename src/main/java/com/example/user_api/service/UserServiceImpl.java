@@ -37,7 +37,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User save(UserDto userDto) {
-
         return userRepository.save(userMapper.toUser(userDto));
     }
 
@@ -66,12 +65,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteById(Long id) {
-        userRepository.deleteById(id);
+    public ResponseEntity<String> deleteById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+
+        if (user.isPresent()) {
+            userRepository.deleteById(id);
+            return new ResponseEntity<>("The user with " + id + " has been deleted",HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("The user with id " + id + " doesn't exist", HttpStatus.NOT_FOUND);
     }
 
     @Override
     public void saveAll(List<User> users) {
         userRepository.saveAll(users);
+    }
+
+    @Override
+    public void deleteAll() {
+        userRepository.deleteAll();
     }
 }

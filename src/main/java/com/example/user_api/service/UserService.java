@@ -5,7 +5,6 @@ import com.example.user_api.model.dto.UserDto;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
     List<User> findAll();
@@ -21,7 +20,9 @@ public interface UserService {
 
     ResponseEntity<String> update(String username, String password, Long id);
 
-    void deleteById(Long id);
+    ResponseEntity<String> deleteById(Long id);
 
     void saveAll(List<User> users);
+
+    void deleteAll();
 }

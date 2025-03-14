@@ -5,7 +5,6 @@ import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -60,9 +59,8 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<HttpStatus> deleteById(@PathVariable Long id) {
-        userService.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<String> deleteById(@PathVariable Long id) {
+        return userService.deleteById(id);
     }
 
     @PostConstruct
