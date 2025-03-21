@@ -38,7 +38,7 @@ public class JwtService {
     public TokenData parseToken(String token) {
         return TokenData.builder()
                 .token(token)
-                .userName(getUserNameFromToken(token))
+                .username(getUserNameFromToken(token))
                 .authorities(getRolesFromToken(token).stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()))
                 .build();
     }

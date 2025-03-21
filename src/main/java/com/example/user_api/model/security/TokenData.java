@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class TokenData {
     private Long id;
-    private String userName;
+    private String username;
     private String token;
     private List<? extends GrantedAuthority> authorities;
 }

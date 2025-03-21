@@ -10,7 +10,7 @@ public class TokenAuthentication extends UsernamePasswordAuthenticationToken {
     private TokenData tokenData;
 
     public TokenAuthentication(TokenData tokenData) {
-        super(tokenData.getUserName(), null, tokenData.getAuthorities());
+        super(tokenData.getUsername(), null, tokenData.getAuthorities());
         this.tokenData = tokenData;
     }
 }
