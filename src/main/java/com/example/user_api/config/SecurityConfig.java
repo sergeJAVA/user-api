@@ -1,6 +1,7 @@
 package com.example.user_api.config;
 
 import com.example.user_api.config.security.JwtPerRequestFilter;
+import com.example.user_api.config.security.TokenFilter;
 import com.example.user_api.service.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtService jwtService;
+    private final TokenFilter tokenFilter;
     @Bean
     public SecurityFilterChain filterChain (HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -36,6 +38,7 @@ public class SecurityConfig {
                         headersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .exceptionHandling(exceptionHandlingConfigurer ->
                         exceptionHandlingConfigurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtPerRequestFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
