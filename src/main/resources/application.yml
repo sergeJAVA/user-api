@@ -7,7 +7,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/usersdb
+    url: jdbc:postgresql://localhost:5433/usersdb
     username: root
     password: pass
     platform: postgres
