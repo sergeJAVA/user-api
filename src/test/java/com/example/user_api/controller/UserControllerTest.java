@@ -73,7 +73,7 @@ public class UserControllerTest {
 
     @Test
     void testGetUserByName() throws Exception {
-        User user = new User(1L, "Serega", "encoded_pass", "user");
+        User user = new User(1L, "Serega", "encodedPass", "user");
         when(userService.findByName("Serega")).thenReturn(user);
 
         mockMvc.perform(get("/user/find/Serega"))
@@ -84,14 +84,16 @@ public class UserControllerTest {
     @Test
     void testCreateUser() throws Exception {
         UserDto userDto = new UserDto("NewUser", "password", "user");
-        User user = new User(1L, "NewUser", "encoded_pass", "user");
+        User user = new User(1L, "NewUser", "encodedPass", "user");
         when(userService.save(any(UserDto.class))).thenReturn(user);
 
         mockMvc.perform(post("/user/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("NewUser"));
+                .andExpect(jsonPath("$.name").value("NewUser"))
+                .andExpect(jsonPath("$.password").value("encodedPass"));
+
     }
 
     @Test
@@ -108,14 +110,14 @@ public class UserControllerTest {
 
     @Test
     void testUpdateUser() throws Exception {
-        when(passwordEncoder.encode("newpass")).thenReturn("encoded_newpass");
-        when(userService.update("NewName", "encoded_newpass", 1L))
+        when(passwordEncoder.encode("newPass")).thenReturn("encodedNewPass");
+        when(userService.update("NewName", "encodedNewPass", 1L))
                 .thenReturn(ResponseEntity.ok("User updated"));
 
         mockMvc.perform(post("/user/update")
                         .param("id", "1")
                         .param("username", "NewName")
-                        .param("password", "newpass"))
+                        .param("password", "newPass"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value("User updated"));
     }
