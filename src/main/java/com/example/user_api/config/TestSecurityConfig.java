@@ -30,10 +30,4 @@ public class TestSecurityConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
-    public JwtService jwtService() {
-        return new JwtService();
-    }
-
 }
