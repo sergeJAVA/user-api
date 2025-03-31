@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
         if (user.isPresent()) {
             userRepository.deleteById(id);
-            return new ResponseEntity<>("The user with " + id + " has been deleted",HttpStatus.OK);
+            return new ResponseEntity<>("The user with " + id + " has been deleted", HttpStatus.OK);
         }
 
         return new ResponseEntity<>("The user with id " + id + " doesn't exist", HttpStatus.NOT_FOUND);
