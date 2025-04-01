@@ -1,7 +1,6 @@
 package com.example.user_api.config;
 
 import com.example.user_api.config.security.TokenFilter;
-import com.example.user_api.service.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class TestSecurityConfig {
 
-    private final TokenFilter tokenFilter;
     @Bean
     public SecurityFilterChain filterChain (HttpSecurity httpSecurity) throws Exception {
         return httpSecurity

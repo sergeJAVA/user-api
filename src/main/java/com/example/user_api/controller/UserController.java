@@ -5,6 +5,7 @@ import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -60,6 +61,12 @@ public class UserController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteById(@PathVariable Long id) {
         return userService.deleteById(id);
+    }
+
+    @DeleteMapping("/delete/all")
+    public ResponseEntity<String> deleteAll() {
+        userService.deleteAll();
+        return new ResponseEntity<>("All users have been deleted from the database", HttpStatus.OK);
     }
 
     @PostConstruct
