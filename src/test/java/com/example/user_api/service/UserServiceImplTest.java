@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -145,7 +146,7 @@ class UserServiceImplTest {
 
     @Test
     void deleteById_ShouldCallRepositoryDelete() {
-        User user = new User(1L, "Serega", "password", "user");
+        User user = new User(1L, "Serega", "password", Set.of("user"));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         ResponseEntity<String> response = userService.deleteById(1L);

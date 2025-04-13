@@ -1,5 +1,6 @@
 package com.example.user_api.controller;
 
+import com.example.user_api.constants.RoleType;
 import com.example.user_api.model.entity.User;
 import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.service.UserService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/user")
@@ -78,11 +80,11 @@ public class UserController {
 
         serega.setName("Serega");
         serega.setPassword(passwordEncoder.encode("12345"));
-        serega.setRole("user");
+        serega.setRoles(Set.of(RoleType.USER.value()));
 
         nikodim.setName("Kolya");
         nikodim.setPassword(passwordEncoder.encode("password"));
-        nikodim.setRole("user");
+        nikodim.setRoles(Set.of(RoleType.ADMIN.value(), RoleType.USER.value()));
 
         users.add(nikodim);
         users.add(serega);

@@ -3,6 +3,8 @@ package com.example.user_api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+
 @Builder
 @Entity
 @AllArgsConstructor
@@ -22,8 +24,8 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "role")
-    private String role;
+    @Column(name = "roles")
+    private Set<String> roles;
 
 
 }

@@ -17,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -37,8 +38,8 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         userService.deleteAll();
-        User serega = new User(1L, "Serega", passwordEncoder.encode("12345"), "user");
-        User kolya = new User(2L, "Kolya", passwordEncoder.encode("password"), "user");
+        User serega = new User(1L, "Serega", passwordEncoder.encode("12345"), Set.of("user"));
+        User kolya = new User(2L, "Kolya", passwordEncoder.encode("password"), Set.of("user"));
         userService.saveAll(List.of(serega, kolya));
     }
 
@@ -78,7 +79,7 @@ class UserControllerTest {
 
     @Test
     void testPostCreateUser() {
-        UserDto userDto = new UserDto("NewUser", "password", "user");
+        UserDto userDto = new UserDto("NewUser", "password", Set.of("user"));
         HttpHeaders headers = createHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<UserDto> request = new HttpEntity<>(userDto, headers);

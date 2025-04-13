@@ -2,6 +2,8 @@ package com.example.user_api.model.dto;
 
 import lombok.*;
 
+import java.util.Set;
+
 @Builder
 @Getter
 @Setter
@@ -10,5 +12,5 @@ import lombok.*;
 public class UserDto {
     private String name;
     private String password;
-    private String role;
+    private Set<String> roles;
 }

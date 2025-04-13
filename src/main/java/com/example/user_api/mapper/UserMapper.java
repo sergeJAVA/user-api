@@ -10,7 +10,7 @@ public class UserMapper {
         return User.builder()
                 .name(userDto.getName())
                 .password(userDto.getPassword())
-                .role(userDto.getRole())
+                .roles(userDto.getRoles())
                 .build();
     }
 }
