@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class UserControllerTest {
 
@@ -30,13 +31,17 @@ class UserControllerTest {
     @Autowired
     private UserService userService;
 
+    @LocalServerPort
+    private int port;
+
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    private String baseUrl = "http://localhost:8080/user";
+    private String baseUrl;
 
     @BeforeEach
     void setUp() {
+        baseUrl = "http://localhost:" + port + "/user";
         userService.deleteAll();
         User serega = new User(1L, "Serega", passwordEncoder.encode("12345"), Set.of("user"));
         User kolya = new User(2L, "Kolya", passwordEncoder.encode("password"), Set.of("user"));
