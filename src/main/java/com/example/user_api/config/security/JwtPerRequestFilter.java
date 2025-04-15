@@ -33,7 +33,7 @@ public class JwtPerRequestFilter extends OncePerRequestFilter {
 
         if (Optional.ofNullable(token).isPresent()) {
             if (jwtService.isTokenExpired(token)) {
-                if (jwtService.isTokenWithinOneHourOfExpiration(token) == false) {
+                if (!jwtService.isTokenWithinOneHourOfExpiration(token)) {
                     sendErrorResponse(response, "Token has expired for more than an hour. Please log in again!", HttpStatus.UNAUTHORIZED);
                     return;
                 }
