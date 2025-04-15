@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,10 @@ public class JwtPerRequestFilter extends OncePerRequestFilter {
 
         if (Optional.ofNullable(token).isPresent()) {
             if (jwtService.isTokenExpired(token)) {
+                if (jwtService.isTokenWithinOneHourOfExpiration(token) == false) {
+                    sendErrorResponse(response, "Token has expired for more than an hour. Please log in again!", HttpStatus.UNAUTHORIZED);
+                    return;
+                }
                 token = jwtService.refreshJwtToken(jwtService.parseExpiredTokenData(token));
                 setJwtCookie(response, token, 604800);
             }
@@ -60,5 +65,12 @@ public class JwtPerRequestFilter extends OncePerRequestFilter {
                 .maxAge(0) // Установка maxAge в 0 удаляет Cookie
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, String message, HttpStatus status)
+            throws IOException {
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }

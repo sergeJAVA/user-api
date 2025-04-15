@@ -77,7 +77,7 @@ public class JwtService {
             return TokenData.builder()
                     .token(token)
                     .username(claims.getSubject())
-                    .authorities(getAuthoritiesFromClaims(claims))
+                    .authorities(getRolesFromToken(token).stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()))
                     .id(claims.get("userId", Long.class))
                     .build();
         } catch (ExpiredJwtException e) {
@@ -85,7 +85,7 @@ public class JwtService {
             return TokenData.builder()
                     .token(token)
                     .username(claims.getSubject())
-                    .authorities(getAuthoritiesFromClaims(claims))
+                    .authorities(getRolesFromClaims(claims))
                     .id(claims.get("userId", Long.class))
                     .build();
         } catch (JwtException | IllegalArgumentException e) {
@@ -94,16 +94,10 @@ public class JwtService {
         }
     }
 
-    private List<SimpleGrantedAuthority> getAuthoritiesFromClaims(Claims claims) {
-        Object rolesObj = claims.get("roles");
-        if (rolesObj instanceof Collection<?> roles) {
-            return roles.stream()
-                    .filter(String.class::isInstance)
-                    .map(String.class::cast)
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
-        }
-        return Collections.emptyList();
+    private List<SimpleGrantedAuthority> getRolesFromClaims(Claims claims) {
+        Function<Claims, List<String>> func = c -> c.get("roles", List.class);
+        List<String> roles = func.apply(claims);
+        return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 
     public boolean isTokenExpired(String token) {
@@ -114,6 +108,36 @@ public class JwtService {
         } catch (JwtException | IllegalArgumentException e) {
             log.error("Error while parsing token for expiration check: {}", e.getMessage());
             return true;
+        }
+    }
+
+    public boolean isTokenWithinOneHourOfExpiration(String token) {
+        try {
+            Date expirationDate = getAllClaimsFromToken(token).getExpiration();
+
+            long oneHourInMillis = 60 * 60 * 1000; // 1 hour in milliseconds
+            long currentTime = new Date().getTime();
+            long expirationTime = expirationDate.getTime();
+
+            return expirationTime < currentTime &&
+                    (currentTime - expirationTime) <= oneHourInMillis;
+        } catch (IllegalArgumentException e) {
+            log.error("Error while parsing token for expiration check: {}", e.getMessage());
+            return false;
+        } catch (ExpiredJwtException e) {
+            Claims claims = e.getClaims();
+
+            long oneHourInMillis = 60 * 60 * 1000; // 1 hour
+            long currentTime = new Date().getTime(); //
+            long expirationTime = claims.getExpiration().getTime();
+
+            if (expirationTime < currentTime &&
+                    (currentTime - expirationTime) <= oneHourInMillis) {
+                log.info("The token is expired and within one hour from expiration");
+                return true;
+            }
+            log.error("The token expired over an hour ago. Please log in again!");
+            return false;
         }
     }
 
