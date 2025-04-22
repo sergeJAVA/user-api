@@ -9,16 +9,17 @@ import java.util.List;
 public interface UserService {
     List<User> findAll();
 
-
     User findById(Long id);
 
     User findByName(String username);
 
     User save(UserDto userDto);
 
-    ResponseEntity<String> update(String username, Long id);
+    ResponseEntity<String> update(String username, Long id, String token);
 
     ResponseEntity<String> update(String username, String password, Long id);
+
+    User updatePassword(String oldPassword,String newPassword, Long id);
 
     ResponseEntity<String> deleteById(Long id);
 

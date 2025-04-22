@@ -159,4 +159,23 @@ public class JwtService {
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
+
+    public String refreshJwtToken(TokenData tokenData, String username) {
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("username", username);
+        claims.put("roles", tokenData.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet()));
+        claims.put("userId", tokenData.getId());
+
+        log.info("Jwt has been refreshed!");
+        return Jwts.builder()
+                .claims(claims)
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1800000))
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
+                .compact();
+    }
 }

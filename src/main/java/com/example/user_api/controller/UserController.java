@@ -2,14 +2,17 @@ package com.example.user_api.controller;
 
 import com.example.user_api.constants.RoleType;
 import com.example.user_api.mapper.UserDtoMapper;
-import com.example.user_api.mapper.UserMapper;
+import com.example.user_api.model.ChangePasswordRequest;
 import com.example.user_api.model.entity.User;
 import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.service.UserService;
 import com.example.user_api.service.security.JwtService;
+import com.sun.net.httpserver.Headers;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -51,9 +54,22 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
-    @GetMapping("/findId/{id}")
-    public User userById(@PathVariable Long id) {
-        return userService.findById(id);
+    @GetMapping("/find/id")
+    public User userById(@CookieValue("token") String token) {
+        return userService.findById(jwtService.getUserIdFromToken(token));
+    }
+
+    @PostMapping("/update/password")
+    public ResponseEntity<UserDto> updatePassword(@RequestBody ChangePasswordRequest request, @CookieValue("token") String token) {
+        User user = userService.updatePassword(request.getOldPassword(),
+                                               request.getNewPassword(),
+                                               jwtService.getUserIdFromToken(token));
+        if (user != null) {
+            return ResponseEntity
+                    .ok()
+                    .body(userDtoMapper.toUserDto(user));
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
     }
 
     @GetMapping("/find/{username}")
@@ -67,8 +83,8 @@ public class UserController {
     }
 
     @PostMapping("/update-username")
-    public ResponseEntity<String> updateUser(@RequestParam Long id, @RequestParam String username) {
-        return userService.update(username, id);
+    public ResponseEntity<String> updateUser(@CookieValue("token") String token ,@RequestParam String username) {
+        return userService.update(username, jwtService.getUserIdFromToken(token), token);
     }
 
     @PostMapping("/update")
