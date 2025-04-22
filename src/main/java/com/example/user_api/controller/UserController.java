@@ -1,9 +1,12 @@
 package com.example.user_api.controller;
 
 import com.example.user_api.constants.RoleType;
+import com.example.user_api.mapper.UserDtoMapper;
+import com.example.user_api.mapper.UserMapper;
 import com.example.user_api.model.entity.User;
 import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.service.UserService;
+import com.example.user_api.service.security.JwtService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -24,6 +28,10 @@ public class UserController {
 
     private final UserService userService;
 
+    private final JwtService jwtService;
+
+    private final UserDtoMapper userDtoMapper;
+
     @GetMapping("/")
     public String home(){
         return "Hello";
@@ -32,6 +40,15 @@ public class UserController {
     @GetMapping("/all-users")
     public List<User> users() {
         return userService.findAll();
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<UserDto> info(@CookieValue("token") String token) {
+        User user = userService.findById(jwtService.getUserIdFromToken(token));
+        if (Optional.ofNullable(user).isPresent()) {
+            return ResponseEntity.ok(userDtoMapper.toUserDto(user));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     @GetMapping("/findId/{id}")
@@ -56,7 +73,6 @@ public class UserController {
 
     @PostMapping("/update")
     public ResponseEntity<String> updateUser(@RequestParam Long id, @RequestParam String username, @RequestParam String password) {
-
         return userService.update(username, passwordEncoder.encode(password), id);
     }
 
