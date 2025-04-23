@@ -46,12 +46,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> update(String username, Long id, String token) {
-        Optional<User> updatedUser = userRepository.findById(id);
+        Optional<User> userToUpdate = userRepository.findById(id);
         Optional<User> existUsername = userRepository.findByName(username);
-        if (updatedUser.isPresent() && existUsername.isEmpty()){
-            updatedUser.get().setName(username);
+        if (userToUpdate.isPresent() && existUsername.isEmpty()){
+            userToUpdate.get().setName(username);
 
-            userRepository.save(updatedUser.get());
+            userRepository.save(userToUpdate.get());
 
             String refreshedToken = jwtService.refreshJwtToken(jwtService.parseToken(token), username);
 

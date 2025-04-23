@@ -3,6 +3,7 @@ package com.example.user_api.controller;
 import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.model.entity.User;
 import com.example.user_api.service.UserService;
+import com.example.user_api.service.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ class UserControllerTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @LocalServerPort
     private int port;
@@ -68,9 +72,12 @@ class UserControllerTest {
     @Test
     void testGetUserById() {
         User user = userService.findByName("Serega");
-        HttpEntity<String> request = new HttpEntity<>(createHeaders());
+        String token = jwtService.generateJwtTokenForTests(user.getId(), user.getName());
+        HttpHeaders headers = createHeaders();
+        headers.add(HttpHeaders.COOKIE, "token=" + token);
+        HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<User> response = restTemplate.exchange(
-                baseUrl + "/findId/" + user.getId(),
+                baseUrl + "/find/id",
                 HttpMethod.GET,
                 request,
                 User.class
@@ -79,7 +86,7 @@ class UserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         User result = response.getBody();
         assertNotNull(result);
-        assertEquals("Serega", result.getName());
+        assertEquals(response.getBody().getName(), "Serega");
     }
 
     @Test
@@ -104,12 +111,14 @@ class UserControllerTest {
     @Test
     void testPostUpdateUsername() {
         User user = userService.findByName("Serega");
+        String token = jwtService.generateJwtTokenForTests(user.getId(), user.getName());
+
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("id", user.getId().toString());
         params.add("username", "NewSerega");
 
         HttpHeaders headers = createHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.add(HttpHeaders.COOKIE, "token=" + token);
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
@@ -122,6 +131,8 @@ class UserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         User updatedUser = userService.findById(user.getId());
         assertEquals("NewSerega", updatedUser.getName());
+        assertTrue(response.getHeaders().containsKey(HttpHeaders.SET_COOKIE));
+        assertEquals("The username with id " + user.getId() + " has been changed", response.getBody());
     }
 
     @Test

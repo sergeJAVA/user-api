@@ -3,13 +3,16 @@ package com.example.user_api.service;
 import com.example.user_api.mapper.UserMapper;
 import com.example.user_api.model.dto.UserDto;
 import com.example.user_api.model.entity.User;
+import com.example.user_api.model.security.TokenData;
 import com.example.user_api.repository.UserRepository;
+import com.example.user_api.service.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -29,6 +32,9 @@ class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private JwtService jwtService;
 
     @Mock
     private UserMapper userMapper;
@@ -109,22 +115,42 @@ class UserServiceImplTest {
 
     @Test
     void updateUsername_WhenUserExists_ShouldReturnSuccessResponse() {
-        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(testUser));
-        when(userRepository.save(testUser)).thenReturn(testUser);
+        String newUsername = "newUsername";
+        String testToken = "testToken";
+        String refreshedToken = "refreshedToken";
+        TokenData tokenData = new TokenData();
 
-        ResponseEntity<String> result = userService.update("newUsername", 1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByName(newUsername)).thenReturn(Optional.empty());
+        when(userRepository.save(testUser)).thenReturn(testUser);
+        when(jwtService.parseToken(testToken)).thenReturn(tokenData);
+        when(jwtService.refreshJwtToken(tokenData, newUsername)).thenReturn(refreshedToken);
+
+        ResponseEntity<String> result = userService.update("newUsername", 1L, "testToken");
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals("The username with id 1 has been changed", result.getBody());
+
+        String cookieHeader = result.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        assertNotNull(cookieHeader);
+        assertTrue(cookieHeader.contains("token=" + refreshedToken));
+        assertTrue(cookieHeader.contains("HttpOnly"));
+        assertTrue(cookieHeader.contains("Secure"));
+        assertTrue(cookieHeader.contains("Path=/"));
+        assertTrue(cookieHeader.contains("Max-Age=604800"));
+
         verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).findByName(newUsername);
         verify(userRepository, times(1)).save(testUser);
+        verify(jwtService, times(1)).parseToken(testToken);
+        verify(jwtService, times(1)).refreshJwtToken(tokenData, newUsername);
     }
 
     @Test
     void updateUsername_WhenUserNotExists_ShouldReturnBadRequest() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        ResponseEntity<String> result = userService.update("newUsername", 1L);
+        ResponseEntity<String> result = userService.update("newUsername", 1L, "testToken");
 
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
         assertEquals("The user with ID 1 doesn't exist ", result.getBody());
