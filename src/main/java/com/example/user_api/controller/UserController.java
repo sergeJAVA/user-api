@@ -54,6 +54,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
+    @GetMapping("/info/id")
+    public ResponseEntity<Long> infoId(@CookieValue("token") String token) {
+        User user = userService.findById(jwtService.getUserIdFromToken(token));
+        if (Optional.ofNullable(user).isPresent()) {
+            return ResponseEntity.ok(user.getId());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
     @GetMapping("/find/id")
     public User userById(@CookieValue("token") String token) {
         return userService.findById(jwtService.getUserIdFromToken(token));
